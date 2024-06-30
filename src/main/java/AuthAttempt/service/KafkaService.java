@@ -1,5 +1,6 @@
 package AuthAttempt.service;
 
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -55,8 +56,10 @@ public class KafkaService implements IService {
 	}
 
 	@Override
-	public void sendRequest(String requestId, String ip, HttpServletRequest request) {
-		sendSensorData(new AuthRequest(requestId, ip, request.getRemoteAddr()));	
+	public String sendRequest(String ip, HttpServletRequest request) {
+		String requestId = UUID.randomUUID().toString();
+		sendSensorData(new AuthRequest(requestId, ip, request.getRemoteAddr()));
+		return requestId;
 	}
 
 

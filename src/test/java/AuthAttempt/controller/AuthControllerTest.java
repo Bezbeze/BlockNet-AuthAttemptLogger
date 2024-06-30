@@ -2,8 +2,6 @@ package AuthAttempt.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.UUID;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +22,7 @@ import AuthAttempt.dto.AuthResponse;
 import AuthAttempt.dto.GeneralErrorResponse;
 import AuthAttempt.exception.RuntimeTimeoutException;
 import AuthAttempt.service.KafkaService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
@@ -46,10 +45,11 @@ class AuthControllerTest {
 	AuthResponse authResponse;
 	String url = "/check-ip/{ip}";
 	RequestBuilder request;
+	String uuid = "12345";
 
 	@BeforeEach
 	void setUp() throws Exception {
-		authResponse = new AuthResponse(UUID.randomUUID().toString(), cleanip, false);
+		authResponse = new AuthResponse(uuid, cleanip, false);
 		request = MockMvcRequestBuilders.get(url, cleanip)
 				.accept(MediaType.APPLICATION_JSON);   //get answer like json
 	}
@@ -60,7 +60,8 @@ class AuthControllerTest {
 	void checkPositiveIpTest() {
 		
 		//Arrange
-		Mockito.when(kafkaService.waitForResponse(Mockito.anyString())).thenReturn(authResponse);
+		Mockito.when(kafkaService.sendRequest(Mockito.anyString(), Mockito.any(HttpServletRequest.class))).thenReturn(uuid);
+		Mockito.when(kafkaService.waitForResponse(uuid)).thenReturn(authResponse);
 			
 		//Act
 		MvcResult result = mockMvc.perform(request)
@@ -79,6 +80,7 @@ class AuthControllerTest {
 	void checkNegativeIpTest() {
 		authResponse.setBlocked(true);
 		authResponse.setCheckIp(blockedIp);
+		Mockito.when(kafkaService.sendRequest(Mockito.anyString(), Mockito.any())).thenReturn(uuid);
 		Mockito.when(kafkaService.waitForResponse(Mockito.anyString())).thenReturn(authResponse);
 		
 		request = MockMvcRequestBuilders.get(url, blockedIp)
@@ -99,7 +101,7 @@ class AuthControllerTest {
 	@SneakyThrows
 	@DisplayName("Failed to get response in time")
 	void timeoutTest() {
-		
+		Mockito.when(kafkaService.sendRequest(Mockito.anyString(), Mockito.any())).thenReturn(uuid);
 		Mockito.when(kafkaService.waitForResponse(Mockito.anyString()))
 		.thenThrow(new RuntimeTimeoutException("Failed to get response in time"));
 		
@@ -117,7 +119,7 @@ class AuthControllerTest {
 	@SneakyThrows
 	@DisplayName("any unexpected exception")
 	void exceptionTest() {
-		
+		Mockito.when(kafkaService.sendRequest(Mockito.anyString(), Mockito.any())).thenReturn(uuid);
 		Mockito.when(kafkaService.waitForResponse(Mockito.anyString()))
 				.thenThrow(new RuntimeException("something was wrong"));
 
