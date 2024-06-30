@@ -24,7 +24,7 @@ public class AuthController {
 	//Everything is done in a single connection(all microservices);
 	//RuntimeTimeoutException("Failed to get response in time")
 	@GetMapping("/check-ip/{ip}")
-	public AuthResponse putMethodName(@PathVariable String ip, HttpServletRequest request) {
+	public AuthResponse checkIp(@PathVariable String ip, HttpServletRequest request) {
 		String uuid= UUID.randomUUID().toString(); //unique identifier for each client response 
 		kafkaService.sendRequest(uuid, ip, request);
 		return kafkaService.waitForResponse(uuid);  
