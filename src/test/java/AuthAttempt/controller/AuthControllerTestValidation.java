@@ -30,7 +30,7 @@ import lombok.experimental.FieldDefaults;
 
 @WebMvcTest
 @FieldDefaults(level = AccessLevel.PRIVATE)
-class AuthControllerTestValidationAndAccess {
+class AuthControllerTestValidation {
 
     @MockBean
     KafkaService kafkaService;
