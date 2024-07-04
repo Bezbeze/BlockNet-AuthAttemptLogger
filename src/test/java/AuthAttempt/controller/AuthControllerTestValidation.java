@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,6 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import AuthAttempt.dto.AuthResponse;
+import AuthAttempt.repo.ClientsRepo;
 import AuthAttempt.service.KafkaService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -40,6 +42,9 @@ class AuthControllerTestValidation {
 
     @Autowired
     ObjectMapper mapper;
+    
+	@MockBean
+	ClientsRepo clientsRepo;
 
     String url = "/check-ip/";
 
@@ -50,6 +55,11 @@ class AuthControllerTestValidation {
     static Stream<String> invalidIpsProvider() {
         return Stream.of("256.167.212.166", "146.203.136", "197.95.-253.234", null);
     }
+    
+	@BeforeEach
+	void setUp() throws Exception {
+		Mockito.when(clientsRepo.existsById(Mockito.anyString())).thenReturn(true);
+	}
 
     @ParameterizedTest
     @MethodSource("validIpsProvider")

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import AuthAttempt.dto.AuthResponse;
 import AuthAttempt.dto.GeneralErrorResponse;
 import AuthAttempt.exception.RuntimeTimeoutException;
+import AuthAttempt.repo.ClientsRepo;
 import AuthAttempt.service.KafkaService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
@@ -37,6 +38,9 @@ class AuthControllerTest {
 	@MockBean
 	KafkaService kafkaService;
 	
+	@MockBean
+	ClientsRepo clientsRepo;
+	
 	@Autowired
 	ObjectMapper mapper;
 	
@@ -52,6 +56,7 @@ class AuthControllerTest {
 		authResponse = new AuthResponse(uuid, cleanip, false);
 		request = MockMvcRequestBuilders.get(url, cleanip)
 				.accept(MediaType.APPLICATION_JSON);   //get answer like json
+		Mockito.when(clientsRepo.existsById(Mockito.anyString())).thenReturn(true);
 	}
 
 	@Test
